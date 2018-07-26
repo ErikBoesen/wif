@@ -31,7 +31,7 @@ elif args.verb == 'connect':
     if not password:
         password = getpass()
     # TODO: Do things in the background/more nicely
-    os.system('(networksetup -setairportnetwork en1 {network} {password} &)'.format(network=args.network,
+    os.system('networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
                                                                                     password=password))
 
 # TODO: get password
