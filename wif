@@ -5,7 +5,7 @@ import os
 import json
 from getpass import getpass
 
-DATA_PATH = os.path.expanduser('~') + '.wifdata'
+DATA_PATH = os.path.expanduser('~') + '/.wifdata'
 
 parser = argparse.ArgumentParser(description='Handle internet connections on MacOS.')
 parser.add_argument('verb')
@@ -15,8 +15,8 @@ args = parser.parse_args()
 
 networks = {}
 if os.path.isfile(DATA_PATH):
-    with open(DATA_PATH):
-        networks = json.load(DATA_PATH)
+    with open(DATA_PATH, 'r') as f:
+        networks = json.load(f)
 
 if args.verb == 'on':
     # TODO: Detect proper interface, not always en1
@@ -30,6 +30,9 @@ elif args.verb == 'connect':
         password = networks.get(args.network)
     if not password:
         password = getpass()
+    networks[args.network] = password
+    with open(DATA_PATH, 'w') as f:
+        json.dump(networks, f)
     # TODO: Do things in the background/more nicely
     os.system('networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
                                                                                     password=password))
