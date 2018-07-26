@@ -18,6 +18,13 @@ make uninstall
 ```
 Any of these commands may require root privileges depending on your environment.
 
+## Use
+Turn WiFi on or off:
+```sh
+wif on
+wif off
+```
+
 ## License
 [MIT](LICENSE)
 
