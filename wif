@@ -17,6 +17,11 @@ networks = {}
 if os.path.isfile(DATA_PATH):
     with open(DATA_PATH, 'r') as f:
         networks = json.load(f)
+else:
+    with open(DATA_PATH, 'w') as f:
+        json.dump(networks, f)
+    os.chmod(CONFIG_PATH, stat.S_IRUSR | stat.S_IRUSR)
+
 
 if args.verb == 'on':
     # TODO: Detect proper interface, not always en1
