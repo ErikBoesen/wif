@@ -35,6 +35,6 @@ elif args.verb == 'connect':
         json.dump(networks, f)
     # TODO: Do things in the background/more nicely
     os.system('networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
-                                                                                    password=password))
-
-# TODO: get password
+                                                                                password=password))
+elif args.verb == 'password':
+    os.system('security find-generic-password -wga {network}'.format(network=args.network))
