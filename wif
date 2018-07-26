@@ -2,12 +2,14 @@
 
 import argparse
 import os
+import re
 import subprocess
 import stat
 import json
 from getpass import getpass
 
 DATA_PATH = os.path.expanduser('~') + '/.wifdata'
+MACADDR_RE = re.compile('([0-9a-f]{2}\:){5}([0-9a-f]){2}')
 
 parser = argparse.ArgumentParser(description='Handle internet connections on MacOS.')
 parser.add_argument('verb')
@@ -38,7 +40,21 @@ elif args.verb == 'list':
     # TODO: -s is a legacy flag and may be removed in the future.
     # Then again, is Apple honestly supporting ANY of their CLI tools? Vote in the comments.
     raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
-    print(raw)
+    if raw == 'No networks found\n':
+        # TODO: Colors or something
+        print(raw, end='')
+    else:
+        # Must remove last empty item and title row
+        split = [line.split() for line in raw.split('\n')][1:-1]
+        for network in split:
+            #print(network)
+            name_col = 1
+            ssid = network[0]
+            while not MACADDR_RE.match(network[name_col]):
+                ssid += ' ' + network[name_col]
+                name_col += 1
+            print('{ssid} / {security}'.format(ssid=ssid,
+                                               security=network[-1]))
 elif args.verb == 'connect':
     # TODO: Automatically recognize passwordless networks
     password = args.password
