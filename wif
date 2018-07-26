@@ -36,7 +36,7 @@ if args.verb == 'on':
 elif args.verb == 'off':
     os.system('/usr/sbin/networksetup -setairportpower en1 off')
 elif args.verb == 'list':
-    # TODO: Give curated output. airport's output is not the cleanest.
+    # TODO: What a mess.
     # TODO: -s is a legacy flag and may be removed in the future.
     # Then again, is Apple honestly supporting ANY of their CLI tools? Vote in the comments.
     raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
@@ -46,6 +46,7 @@ elif args.verb == 'list':
     else:
         # Must remove last empty item and title row
         split = [line.split() for line in raw.split('\n')][1:-1]
+        print('NETWORK | SECURITY')
         for network in split:
             #print(network)
             name_col = 1
@@ -53,8 +54,9 @@ elif args.verb == 'list':
             while not MACADDR_RE.match(network[name_col]):
                 ssid += ' ' + network[name_col]
                 name_col += 1
-            print('{ssid} / {security}'.format(ssid=ssid,
-                                               security=network[-1]))
+            security = network[-1].split('(')[0]
+            print('{ssid} | {security}'.format(ssid=ssid,
+                                               security=security))
 elif args.verb == 'connect':
     # TODO: Automatically recognize passwordless networks
     password = args.password
