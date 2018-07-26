@@ -3,6 +3,7 @@
 import argparse
 import os
 import json
+from getpass import getpass
 
 DATA_PATH = os.path.expanduser('~') + '.wifdata'
 
@@ -13,9 +14,9 @@ parser.add_argument('-p', dest='password', help='Password for network to which y
 args = parser.parse_args()
 
 networks = {}
-if os.isfile(DATA_PATH):
-    with open(DATA_PATH
-    networks = json.load(DATA_PATH)
+if os.path.isfile(DATA_PATH):
+    with open(DATA_PATH):
+        networks = json.load(DATA_PATH)
 
 if args.verb == 'on':
     # TODO: Detect proper interface, not always en1
@@ -24,6 +25,11 @@ elif args.verb == 'off':
     os.system('networksetup -setairportpower en1 off')
 # TODO: LIST
 elif args.verb == 'connect':
+    password = args.password
+    if not password:
+        password = networks.get(args.network)
+    if not password:
+        password = getpass()
     # TODO: Do things in the background/more nicely
     os.system('(networksetup -setairportnetwork en1 {network} {password} &)'.format(network=args.network,
                                                                                     password=password))
