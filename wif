@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import subprocess
 import stat
 import json
 from getpass import getpass
@@ -29,14 +30,15 @@ if os.stat(DATA_PATH).st_mode & (stat.S_IRGRP | stat.S_IROTH):
 
 if args.verb == 'on':
     # TODO: Detect proper interface, not always en1
-    os.system('networksetup -setairportpower en1 on')
+    os.system('/usr/sbin/networksetup -setairportpower en1 on')
 elif args.verb == 'off':
-    os.system('networksetup -setairportpower en1 off')
+    os.system('/usr/sbin/networksetup -setairportpower en1 off')
 elif args.verb == 'list':
     # TODO: Give curated output. airport's output is not the cleanest.
     # TODO: -s is a legacy flag and may be removed in the future.
     # Then again, is Apple honestly supporting ANY of their CLI tools? Vote in the comments.
-    os.system('/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s')
+    raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
+    print(raw)
 elif args.verb == 'connect':
     # TODO: Automatically recognize passwordless networks
     password = args.password
@@ -48,7 +50,7 @@ elif args.verb == 'connect':
     with open(DATA_PATH, 'w') as f:
         json.dump(networks, f)
     # TODO: Do things in the background/more nicely
-    os.system('networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
+    os.system('/usr/sbin/networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
                                                                                 password=password))
 elif args.verb == 'password':
-    os.system('security find-generic-password -wga {network}'.format(network=args.network))
+    os.system('/usr/bin/security find-generic-password -wga {network}'.format(network=args.network))
