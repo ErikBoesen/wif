@@ -7,6 +7,7 @@ import os
 parser = argparse.ArgumentParser(description='Handle internet connections on MacOS.')
 parser.add_argument('verb')
 parser.add_argument('-n', dest='network', help='Name of network to which to connect')
+parser.add_argument('-p', dest='password', help='Password for network to which you wish to connect. USE NOT RECOMMENDED.')
 args = parser.parse_args()
 
 if args.verb == 'on':
@@ -14,3 +15,9 @@ if args.verb == 'on':
     os.system('networksetup -setairportpower en1 on')
 elif args.verb == 'off':
     os.system('networksetup -setairportpower en1 off')
+# TODO: LIST
+elif args.verb == 'connect':
+    password = ''
+    # TODO: Do things in the background/more nicely
+    os.system('(networksetup -setairportnetwork en1 {network} {password} &)'.format(network=args.network,
+                                                                                    password=password))
