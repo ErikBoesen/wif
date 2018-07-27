@@ -89,4 +89,7 @@ elif args.verb == 'connect':
         json.dump(networks, f)
     wifi.connect(args.network, password)
 elif args.verb == 'password':
-    wifi.password(args.network)
+    if networks.get(args.network):
+        print(networks[args.network])
+    else:
+        wifi.password(args.network)
