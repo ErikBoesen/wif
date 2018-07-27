@@ -30,33 +30,53 @@ else:
 if os.stat(DATA_PATH).st_mode & (stat.S_IRGRP | stat.S_IROTH):
     print('Warning: network data file ({path}) may be accessible by other users.'.format(path=DATA_PATH))
 
+class WiFi:
+    def __init__(self):
+        pass
+
+    def power(self, power: bool):
+        # TODO: Detect proper interface, not always en1
+        os.system('/usr/sbin/networksetup -setairportpower en1 ' + ('on' if power else 'off'))
+
+    def networks(self):
+        # TODO: What a mess.
+        # TODO: -s is a legacy flag and may be removed in the future.
+        raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
+        if raw == 'No networks found\n':
+            # TODO: Colors or something
+            print(raw, end='')
+        else:
+            # Must remove last empty item and title row
+            split = [line.split() for line in raw.split('\n')][1:-1]
+            print('NETWORK | SECURITY')
+            for col in split:
+                #print(network)
+                name_col = 1
+                ssid = col[0]
+                while not MACADDR_RE.match(network[name_col]):
+                    ssid += ' ' + network[name_col]
+                    name_col += 1
+                security = network[-1].split('(')[0]
+                print('{ssid} | {security}'.format(ssid=ssid,
+                                                   security=security))
+
+    def connect(self, network: str, password: str=''):
+        # TODO: Would break if name contained "
+        os.system('/usr/sbin/networksetup -setairportnetwork en1 "{network}" "{password}"'.format(network=network,
+                                                                                                  password=password))
+
+    def password(self, network: str):
+        os.system('/usr/bin/security find-generic-password -wga "{network}"'.format(network=network))
+
+
+wifi = WiFi()
+
 if args.verb == 'on':
-    # TODO: Detect proper interface, not always en1
-    os.system('/usr/sbin/networksetup -setairportpower en1 on')
+    wifi.power(True)
 elif args.verb == 'off':
-    os.system('/usr/sbin/networksetup -setairportpower en1 off')
+    wifi.power(False)
 elif args.verb == 'list':
-    # TODO: What a mess.
-    # TODO: -s is a legacy flag and may be removed in the future.
-    # Then again, is Apple honestly supporting ANY of their CLI tools? Vote in the comments.
-    raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
-    if raw == 'No networks found\n':
-        # TODO: Colors or something
-        print(raw, end='')
-    else:
-        # Must remove last empty item and title row
-        split = [line.split() for line in raw.split('\n')][1:-1]
-        print('NETWORK | SECURITY')
-        for network in split:
-            #print(network)
-            name_col = 1
-            ssid = network[0]
-            while not MACADDR_RE.match(network[name_col]):
-                ssid += ' ' + network[name_col]
-                name_col += 1
-            security = network[-1].split('(')[0]
-            print('{ssid} | {security}'.format(ssid=ssid,
-                                               security=security))
+    wifi.networks()
 elif args.verb == 'connect':
     # TODO: Automatically recognize passwordless networks
     password = args.password
@@ -67,8 +87,6 @@ elif args.verb == 'connect':
     networks[args.network] = password
     with open(DATA_PATH, 'w') as f:
         json.dump(networks, f)
-    # TODO: Do things in the background/more nicely
-    os.system('/usr/sbin/networksetup -setairportnetwork en1 "{network}" "{password}"'.format(network=args.network,
-                                                                                password=password))
+    wifi.connect(args.network, password)
 elif args.verb == 'password':
-    os.system('/usr/bin/security find-generic-password -wga "{network}"'.format(network=args.network))
+    wifi.password(args.network)
