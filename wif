@@ -68,7 +68,7 @@ elif args.verb == 'connect':
     with open(DATA_PATH, 'w') as f:
         json.dump(networks, f)
     # TODO: Do things in the background/more nicely
-    os.system('/usr/sbin/networksetup -setairportnetwork en1 {network} {password}'.format(network=args.network,
+    os.system('/usr/sbin/networksetup -setairportnetwork en1 "{network}" "{password}"'.format(network=args.network,
                                                                                 password=password))
 elif args.verb == 'password':
-    os.system('/usr/bin/security find-generic-password -wga {network}'.format(network=args.network))
+    os.system('/usr/bin/security find-generic-password -wga "{network}"'.format(network=args.network))
