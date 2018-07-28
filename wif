@@ -44,21 +44,25 @@ class WiFi:
         raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
         if raw == 'No networks found\n':
             # TODO: Colors or something
-            print(raw, end='')
+            return []
         else:
+            # TODO: Naming in this section especially is confusing
             # Must remove last empty item and title row
             split = [line.split() for line in raw.split('\n')][1:-1]
-            print('NETWORK | SECURITY')
+            networks = []
             for col in split:
                 #print(network)
                 name_col = 1
                 ssid = col[0]
-                while not MACADDR_RE.match(network[name_col]):
-                    ssid += ' ' + network[name_col]
+                while not MACADDR_RE.match(col[name_col]):
+                    ssid += ' ' + col[name_col]
                     name_col += 1
-                security = network[-1].split('(')[0]
-                print('{ssid} | {security}'.format(ssid=ssid,
-                                                   security=security))
+                security = col[-1].split('(')[0]
+                networks.append({
+                    'ssid': ssid,
+                    'security': security,
+                })
+            return networks
 
     def connect(self, network: str, password: str=''):
         # TODO: Would break if name contained "
@@ -76,7 +80,8 @@ if args.verb == 'on':
 elif args.verb == 'off':
     wifi.power(False)
 elif args.verb == 'list':
-    wifi.networks()
+    for network in wifi.networks():
+       print('{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']))
 elif args.verb == 'connect':
     # TODO: Automatically recognize passwordless networks
     password = args.password
