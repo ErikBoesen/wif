@@ -7,6 +7,7 @@ import subprocess
 import stat
 import json
 from getpass import getpass
+from pick import pick
 
 DATA_PATH = os.path.expanduser('~') + '/.wifdata'
 MACADDR_RE = re.compile('([0-9a-f]{2}\:){5}([0-9a-f]){2}')
@@ -83,16 +84,21 @@ elif args.verb == 'list':
     for network in wifi.networks():
        print('{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']))
 elif args.verb == 'connect':
+    network = args.network
+    if not network:
+        options = wifi.networks()
+        # TODO: Clean up this line when it isn't midnight
+        network = options[pick(['{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']) for network in options], title='Choose a network:')[1]]['ssid']
     # TODO: Automatically recognize passwordless networks
     password = args.password
     if not password:
-        password = networks.get(args.network)
+        password = networks.get(network)
     if not password:
         password = getpass()
-    networks[args.network] = password
+    networks[network] = password
     with open(DATA_PATH, 'w') as f:
         json.dump(networks, f)
-    wifi.connect(args.network, password)
+    wifi.connect(network, password)
 elif args.verb == 'password':
     if networks.get(args.network):
         print(networks[args.network])
