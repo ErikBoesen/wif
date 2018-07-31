@@ -59,6 +59,7 @@ class WiFi:
                     ssid += ' ' + col[name_col]
                     name_col += 1
                 security = col[-1].split('(')[0]
+                # TODO: Return more details, not just name and security level.
                 networks.append({
                     'ssid': ssid,
                     'security': security,
