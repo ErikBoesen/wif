@@ -94,7 +94,7 @@ elif args.verb == 'connect':
     password = args.password
     if not password:
         password = networks.get(network)
-    if not password:
+    if password == None:
         password = getpass()
     networks[network] = password
     with open(DATA_PATH, 'w') as f:
