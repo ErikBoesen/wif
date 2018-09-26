@@ -1,11 +1,11 @@
 exec = wif
-dest = /usr/local/bin
+DESTDIR = /usr/local/bin
 
 install:
-	install -m 0755 $(exec) $(dest)
+	install -m 0755 $(exec) $(DESTDIR)
 
 link:
-	ln -s $(realpath $(exec)) $(dest)
+	ln -s $(realpath $(exec)) $(DESTDIR)
 
 uninstall:
 	rm $(dest)/$(exec)
