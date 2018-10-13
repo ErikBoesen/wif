@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import re
-import subprocess
 import stat
-import json
+import subprocess
 from getpass import getpass
+
 from pick import pick
 from prettytable import PrettyTable
 
@@ -88,7 +89,7 @@ elif args.verb == 'off':
 elif args.verb == 'list':
     table = PrettyTable(['SSID', 'Security'], border=False, header=False)
     for network in wifi.networks():
-        table.add_row([network['ssid'],network['security']])
+        table.add_row([network['ssid'], network['security']])
     print(table)
 elif args.verb == 'connect':
     network = args.network
