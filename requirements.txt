@@ -1,1 +1,2 @@
-pick
+pick==0.6.4
+prettytable==0.7.2
