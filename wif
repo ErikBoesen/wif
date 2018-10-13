@@ -8,6 +8,7 @@ import stat
 import json
 from getpass import getpass
 from pick import pick
+from prettytable import PrettyTable
 
 DATA_PATH = os.path.expanduser('~') + '/.wifdata'
 MACADDR_RE = re.compile('([0-9a-f]{2}\:){5}([0-9a-f]){2}')
@@ -15,7 +16,8 @@ MACADDR_RE = re.compile('([0-9a-f]{2}\:){5}([0-9a-f]){2}')
 parser = argparse.ArgumentParser(description='Handle internet connections on MacOS.')
 parser.add_argument('verb')
 parser.add_argument('-n', dest='network', help='Name of network to which to connect')
-parser.add_argument('-p', dest='password', help='Password for network to which you wish to connect. USE NOT RECOMMENDED.')
+parser.add_argument('-p', dest='password',
+                    help='Password for network to which you wish to connect. USE NOT RECOMMENDED.')
 args = parser.parse_args()
 
 networks = {}
@@ -31,6 +33,7 @@ else:
 if os.stat(DATA_PATH).st_mode & (stat.S_IRGRP | stat.S_IROTH):
     print('Warning: network data file ({path}) may be accessible by other users.'.format(path=DATA_PATH))
 
+
 class WiFi:
     def __init__(self):
         pass
@@ -41,7 +44,9 @@ class WiFi:
     def networks(self):
         # TODO: What a mess.
         # TODO: -s is a legacy flag and may be removed in the future.
-        raw = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-s']).decode()
+        raw = subprocess.check_output(
+            ['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport',
+             '-s']).decode()
         if raw == 'No networks found\n':
             # TODO: Colors or something
             return []
@@ -51,7 +56,7 @@ class WiFi:
             split = [line.split() for line in raw.split('\n')][1:-1]
             networks = []
             for col in split:
-                #print(network)
+                # print(network)
                 name_col = 1
                 ssid = col[0]
                 while not MACADDR_RE.match(col[name_col]):
@@ -65,7 +70,7 @@ class WiFi:
                 })
             return networks
 
-    def connect(self, network: str, password: str=''):
+    def connect(self, network: str, password: str = ''):
         # TODO: Would break if name contained "
         os.system('/usr/sbin/networksetup -setairportnetwork en0 "{network}" "{password}"'.format(network=network,
                                                                                                   password=password))
@@ -81,14 +86,18 @@ if args.verb == 'on':
 elif args.verb == 'off':
     wifi.power(False)
 elif args.verb == 'list':
+    table = PrettyTable(['SSID', 'Security'], border=False, header=False)
     for network in wifi.networks():
-       print('{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']))
+        table.add_row([network['ssid'],network['security']])
+    print(table)
 elif args.verb == 'connect':
     network = args.network
     if not network:
         options = wifi.networks()
         # TODO: Clean up this line when it isn't midnight
-        network = options[pick(['{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']) for network in options], title='Choose a network:')[1]]['ssid']
+        network = options[pick(
+            ['{ssid} | {security}'.format(ssid=network['ssid'], security=network['security']) for network in options],
+            title='Choose a network:')[1]]['ssid']
     # TODO: Automatically recognize passwordless networks
     password = args.password
     if not password:
