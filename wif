@@ -72,12 +72,12 @@ class WiFi:
             return networks
 
     def connect(self, network: str, password: str = ''):
-        # TODO: Would break if name contained "
-        os.system('/usr/sbin/networksetup -setairportnetwork en0 "{network}" "{password}"'.format(network=network,
-                                                                                                  password=password))
+        # TODO: Would break if name or password contained '
+        os.system('/usr/sbin/networksetup -setairportnetwork en0 \'{network}\' \'{password}\''.format(network=network.replace('\'', '\\\''),
+                                                                                                  password=password.replace('\'', '\\\'')))
 
     def password(self, network: str):
-        os.system('/usr/bin/security find-generic-password -wga "{network}"'.format(network=network))
+        os.system('/usr/bin/security find-generic-password -wga \'{network}\''.format(network=network.replace('\'', '\\\'')))
 
 
 wifi = WiFi()
