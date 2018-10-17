@@ -28,7 +28,7 @@ if os.path.isfile(DATA_PATH):
 else:
     with open(DATA_PATH, 'w') as f:
         json.dump(networks, f)
-    os.chmod(DATA_PATH, stat.S_IRUSR | stat.S_IRUSR)
+    os.chmod(DATA_PATH, stat.S_IRUSR | stat.S_IWUSR)
 
 # Warn if group or public can read config and the private details therein.
 if os.stat(DATA_PATH).st_mode & (stat.S_IRGRP | stat.S_IROTH):
